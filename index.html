@@ -76,7 +76,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #8FB0
 <sc-if value="{{ hasAmt }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid rgba(255,255,255,.12);padding-top:16px;font-size:14px">
 <div style="display:flex;justify-content:space-between;gap:12px;color:rgba(255,255,255,.7)"><span>Subtotal</span><span>{{ subTxt }}</span></div>
-<div style="display:flex;justify-content:space-between;gap:12px;color:rgba(255,255,255,.7)"><span>Platform fee (4%)</span><span>{{ feeTxt }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;color:rgba(255,255,255,.7)"><span>{{ feeLabel }}</span><span>{{ feeTxt }}</span></div>
 <div style="display:flex;justify-content:space-between;gap:12px;font-size:17px;font-weight:900;color:#FFFFFF"><span>Total</span><span>{{ totTxt }}</span></div>
 </div>
 </sc-if>
@@ -123,13 +123,13 @@ class Component extends DCLogic {
     const c = this.cur(); const v = parseFloat(this.state.amount);
     if (!v || v <= 0) return this.setState({ err: 'Enter the amount you want to pay.' });
     const r = this.rate(c); if (!r) return this.setState({ err: 'Loading exchange rates, please try again in a moment.' });
-    const tot = this.total(v); const usd = Math.max(0.5, Math.round(tot / r * 100) / 100);
+    const send = c === 'INR' ? this.total(v) : v; const usd = Math.max(0.5, Math.round(send / r * 100) / 100);
     const pid = (this.props.productId || DODO_PRODUCT_ID || '').trim();
     if (!pid) return this.setState({ err: 'Online payment is not set up yet. Please contact hello@skilleaze.com.' });
     const host = (this.props.testMode === false || (this.props.testMode == null && LIVE)) ? 'https://checkout.dodopayments.com' : 'https://test.checkout.dodopayments.com';
     const p = new URLSearchParams({ quantity: '1', paymentAmount: String(usd), country: this.state.cc, paymentCurrency: c, redirect_url: 'https://www.skilleaze.com/?payment=done' });
     if (this.state.note) p.set('metadata_services', this.state.note.slice(0, 200));
-    p.set('metadata_amount_local', c + ' ' + tot); p.set('metadata_platform_fee', c + ' ' + Math.round((tot - v) * 100) / 100);
+    p.set('metadata_amount_local', c + ' ' + send); if (c === 'INR') p.set('metadata_platform_fee', 'INR ' + Math.round((send - v) * 100) / 100);
     (window.top || window).location.href = host + '/buy/' + encodeURIComponent(pid) + '?' + p.toString();
   }
   renderVals() {
@@ -149,7 +149,8 @@ class Component extends DCLogic {
       onNote: e => this.setState({ note: e.target.value }),
       err, pay: () => this.pay(),
       hasAmt: v > 0, subTxt: v > 0 ? this.fmt(c, v) : '', feeTxt: v > 0 ? this.fmt(c, this.total(v) - v) : '', totTxt: v > 0 ? this.fmt(c, this.total(v)) : '',
-      payLabel: v > 0 ? 'Pay ' + this.fmt(c, this.total(v)) : 'Continue to payment'
+      feeLabel: c === 'INR' ? 'Platform fee (4%)' : 'Platform fee (4%, added at checkout)',
+      payLabel: c === 'INR' && v > 0 ? 'Pay ' + this.fmt(c, this.total(v)) : 'Continue to payment'
     };
   }
 }
