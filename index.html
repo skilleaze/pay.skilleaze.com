@@ -94,8 +94,8 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #8FB0
 <script type="text/x-dc" data-dc-script data-props="{&quot;productId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dodo Payments&quot;},&quot;testMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Dodo Payments&quot;}}">
 const C = {IN:['India','INR'],AE:['United Arab Emirates','AED'],SA:['Saudi Arabia','SAR'],QA:['Qatar','QAR'],KW:['Kuwait','KWD'],BH:['Bahrain','BHD'],OM:['Oman','OMR'],US:['United States','USD'],GB:['United Kingdom','GBP'],CA:['Canada','CAD'],AU:['Australia','AUD'],NZ:['New Zealand','NZD'],SG:['Singapore','SGD'],MY:['Malaysia','MYR'],DE:['Germany','EUR'],FR:['France','EUR'],IE:['Ireland','EUR'],NL:['Netherlands','EUR'],IT:['Italy','EUR'],ES:['Spain','EUR'],PT:['Portugal','EUR'],BE:['Belgium','EUR'],AT:['Austria','EUR'],FI:['Finland','EUR'],GR:['Greece','EUR'],LU:['Luxembourg','EUR'],CH:['Switzerland','CHF'],SE:['Sweden','SEK'],NO:['Norway','NOK'],DK:['Denmark','DKK'],PL:['Poland','PLN'],CZ:['Czech Republic','CZK'],HU:['Hungary','HUF'],RO:['Romania','RON'],JP:['Japan','JPY'],KR:['South Korea','KRW'],HK:['Hong Kong','HKD'],TH:['Thailand','THB'],ID:['Indonesia','IDR'],PH:['Philippines','PHP'],VN:['Vietnam','VND'],LK:['Sri Lanka','LKR'],BD:['Bangladesh','BDT'],NP:['Nepal','NPR'],PK:['Pakistan','PKR'],EG:['Egypt','EGP'],ZA:['South Africa','ZAR'],NG:['Nigeria','NGN'],KE:['Kenya','KES'],MA:['Morocco','MAD'],JO:['Jordan','JOD'],TR:['Turkey','TRY'],BR:['Brazil','BRL'],MX:['Mexico','MXN']};
 // ▼ PASTE YOUR DODO PRODUCT ID HERE, and set LIVE to true when you go live
-const DODO_PRODUCT_ID = 'pdt_0Nr8kfRb47HSl2RswsKe8';
-const LIVE = false;
+const DODO_PRODUCT_ID = 'pdt_0Nr9Lkp69Dw4pI7duE9w2';
+const LIVE = true;
 const ZERO = {JPY:1,KRW:1,VND:1,IDR:1,HUF:1};
 const FIXED = {INR:[490,590,100,690,690,990],AED:[20,25,5,30,30,39],USD:[6,9,2,10,10,15]};
 const SVC = ['ATS-Friendly CV','Europass CV','Cover Letter','LinkedIn Optimization','Job Portal Optimization','Personal Portfolio'];
@@ -124,9 +124,9 @@ class Component extends DCLogic {
     if (!v || v <= 0) return this.setState({ err: 'Enter the amount you want to pay.' });
     const r = this.rate(c); if (!r) return this.setState({ err: 'Loading exchange rates, please try again in a moment.' });
     const send = c === 'INR' ? this.total(v) : v; const usd = Math.max(0.5, Math.round(send / r * 100) / 100);
-    const pid = (this.props.productId || DODO_PRODUCT_ID || '').trim();
+    const pid = DODO_PRODUCT_ID;
     if (!pid) return this.setState({ err: 'Online payment is not set up yet. Please contact hello@skilleaze.com.' });
-    const host = (this.props.testMode === false || (this.props.testMode == null && LIVE)) ? 'https://checkout.dodopayments.com' : 'https://test.checkout.dodopayments.com';
+    const host = LIVE ? 'https://checkout.dodopayments.com' : 'https://test.checkout.dodopayments.com';
     const p = new URLSearchParams({ quantity: '1', paymentAmount: String(usd), country: this.state.cc, paymentCurrency: c, redirect_url: 'https://www.skilleaze.com/?payment=done' });
     if (this.state.note) p.set('metadata_services', this.state.note.slice(0, 200));
     p.set('metadata_amount_local', c + ' ' + send); if (c === 'INR') p.set('metadata_platform_fee', 'INR ' + Math.round((send - v) * 100) / 100);
